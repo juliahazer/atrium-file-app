@@ -1,0 +1,12 @@
+extends base.pug
+
+block content
+  a(href='/users/logout') logout
+  a(href='./file-search') search
+  a(href='./file-upload') upload/list
+  h1 File Search Results
+  div
+    h3 For: "#{searchText}"
+  ul
+    each file in files
+      li #{file}

@@ -1,0 +1,15 @@
+extends base.pug
+
+block content
+  a(href='/users/logout') logout
+  a(href='./file-search') search
+  h1 File Upload
+  div
+    form(action='/files/file-upload', method='POST', enctype='multipart/form-data')
+      label(for='description') Description:
+      textarea(name='description', id="description", cols='50', rows='3')
+      input(type='file', name='upload', required)
+      input(type='submit', value='Upload')
+  ul
+    each file in files
+      li Name: #{file.name} Type: #{file.type} Date: #{file.uploadDate} Description: #{file.description}

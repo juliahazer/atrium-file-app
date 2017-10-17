@@ -1,0 +1,11 @@
+extends base.pug
+
+block content
+  a(href='/users/logout') logout
+  a(href='./file-upload') upload/list
+  h1 File Search
+  div
+    form(action='/files/file-search', method='POST')
+      label(for='search') Search text:
+      textarea(name='search', id="search", cols='50', rows='8')
+      input(type='submit', value='Search')
