@@ -27,6 +27,8 @@
 
 * Add functionality to add more users & use the bcrypt module to more safely store passwords (right now the current password info is stored as text in the database). 
 
+* For simplicity sake, I included the .env file in the project with a simple secret key to 'protect' the session - but this .env file typically would be created at the local level and not uploaded onto GitHub (plus the key would be more complicated)
+
 * Add / do additional testing to ensure that the app works for additional test cases (especially around file search functionality)
 
 * Consideration should be given to how this would scale (e.g., search / uploading a LARGE number of files) and how to ensure efficiency during searching files. 
