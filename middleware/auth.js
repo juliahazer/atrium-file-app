@@ -6,10 +6,3 @@ exports.loginRequired = function(req,res,next){
         next();
     }
 }
-
-exports.ensureCorrectUser = function(req,res,next){
-    if(req.user.id !== req.params.id){
-        req.flash('error', 'Unauthorized!')
-        res.redirect('/users')
-    }
-}

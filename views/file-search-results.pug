@@ -1,12 +1,20 @@
 extends base.pug
 
 block content
-  a(href='/users/logout') logout
-  a(href='./file-search') search
-  a(href='./file-upload') upload/list
-  h1 File Search Results
-  div
-    h3 For: "#{searchText}"
-  ul
-    each file in files
-      li #{file}
+
+  ul(class='nav nav-pills')
+    li
+      a(href='/users/logout') Logout
+    li
+      a(href='./file-upload') Upload/List
+    li
+      a(href='./file-search') Search
+    li(class='active')
+      a(href='#') Search Results
+
+  div(class='container-fluid')
+    h2 File Search Results
+    h4 for: "#{searchText}"...
+    ul
+      each file in files
+        li #{file}

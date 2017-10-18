@@ -21,10 +21,14 @@ var storage = multer.diskStorage({
 });
 var upload = multer({ storage: storage });
 
+/*NOTE: variables to help transfer data between POST file-search & redirect to GET file-search-results*/
+//to store array of file names found during search
 var fileMatchArr;
+//to store search text
 var searchText;
 
 router.get('/file-upload', authMiddleware.loginRequired, function(req,res){
+  //find all existing files to display
   db.File.find().then(function(files){
     res.render('file-upload', {files})
   }, function(err){
@@ -32,7 +36,9 @@ router.get('/file-upload', authMiddleware.loginRequired, function(req,res){
   });
 });
 
+//user multer module as middleware to handle file upload
 router.post('/file-upload', authMiddleware.loginRequired, upload.single('upload'), function(req, res){
+  //also create a new File record in the database
   db.File.create({
     name: req.file.originalname,
     type: req.file.mimetype,
@@ -43,56 +49,68 @@ router.post('/file-upload', authMiddleware.loginRequired, upload.single('upload'
   res.redirect('/files/file-upload');
 });
 
+//display file search form (to search files for matching text)
 router.get('/file-search', authMiddleware.loginRequired, function(req,res){
-  db.File.find().then(function(files){
-    res.render('file-search', {files});
-  }, function(err){
-    res.send("ERROR!");
-  });
+  res.render('file-search');
 });
 
+//display file search results
 router.get('/file-search-results', authMiddleware.loginRequired, function(req,res){
+  //searchText & fileMatchArr info set in the POST /file-search route
   res.render('file-search-results', {searchText, files: fileMatchArr});
 });
 
+//SEARCH FILES FOR MATCHING SEARCH TEXT (upon search form submission)
 router.post('/file-search', authMiddleware.loginRequired, function(req, res){
+  //remove any excess white space from user-entered search text
   searchText = req.body.search.trim();
   var path = "./uploads";
   fileMatchArr = [];
   let promiseArr = [];
   fs.readdirAsync(path).map(file => {
-      var buffer = readChunk.sync(path + "/" + file, 0, 4100);
-      var fileTypeInfo;
-      var fileName;
-      if (fileType(buffer) !== null) {
-        fileTypeInfo = fileType(buffer).mime;
-        //only search in PDFs and WordDocs
-        if ((fileTypeInfo === 'application/pdf' ||
-          fileTypeInfo === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') &&
-          file !== ".DS_Store") {
-          fileName = file;
-          if (fileName.toUpperCase().indexOf(searchText.toUpperCase()) !== -1) {
-            fileMatchArr.push(fileName);
-          } else {
-            var currPromise = new Promise((resolve, reject) => {
-              textract.fromFileWithPath(path + "/" + file, function( error, text ) {
-                if (text.toUpperCase().indexOf(searchText.toUpperCase()) !== -1) {
-                  fileMatchArr.push(fileName);
-                }
-                resolve();
-              });
+    var fileTypeInfo;
+    var fileName;
+    //used to get file type
+    var buffer = readChunk.sync(path + "/" + file, 0, 4100);
+    if (fileType(buffer) !== null) {
+      //grab file type
+      fileTypeInfo = fileType(buffer).mime;
+      //only search in PDFs and WordDocs
+      if ((fileTypeInfo === 'application/pdf' ||
+        fileTypeInfo === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') &&
+        file !== ".DS_Store") {
+        fileName = file;
+
+        /*if file name contains searchText (regardless of case) add the file name to fileMatchArr (results)*/
+        if (fileName.toUpperCase().indexOf(searchText.toUpperCase()) !== -1) {
+          fileMatchArr.push(fileName);
+        /*otherwise search contents of the file...*/
+        } else {
+          var currPromise = new Promise((resolve, reject) => {
+            /* use textract module to search the contents
+            of the Word/PDF files*/
+            textract.fromFileWithPath(path + "/" + file, function( error, text ) {
+              /*if file contents contains searchText (regardless of case) add the file name to fileMatchArr (results)*/
+              if (text.toUpperCase().indexOf(searchText.toUpperCase()) !== -1) {
+                fileMatchArr.push(fileName);
+              }
+              resolve();
             });
-            promiseArr.push(currPromise);
-          }
+          });
+          //since async, add the promise to promiseArr
+          promiseArr.push(currPromise);
         }
       }
-    }).then(() => {
-      Promise.all(promiseArr).then(() => {
-        if (fileMatchArr.length === 0) {
-          fileMatchArr = ['No matching files found!'];
-        }
-        return res.redirect('/files/file-search-results');
-      });
+    }
+  }).then(() => {
+    //ensure finished checking contents of all files
+    //before redirecting to display results
+    Promise.all(promiseArr).then(() => {
+      if (fileMatchArr.length === 0) {
+        fileMatchArr = ['No matching files found!'];
+      }
+      return res.redirect('/files/file-search-results');
+    });
   });
 });
 

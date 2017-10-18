@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var db = require("../models");
+//http://passportjs.org/docs
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -11,20 +12,17 @@ passport.use(new LocalStrategy(
     passReqToCallback: true,
   },
   function verifyCallback(req, username, password, done) {
+    //check User database for matching username/password record
     db.User.findOne({ username: username, password: password}, function (err, user) {
       if (err) return done(err);
       if (!user) {
+        //if no matching user, flash error message
         req.flash('message', 'incorrect login!')
         return done(null, false);
+      } else {
+        //if matching user, return the user record
+        return done(null, user);
       }
-      user.comparePassword(password, function(err,isMatch){
-        if(isMatch){
-            return done(null, user);
-        } else {
-            req.flash('message', 'incorrect login!')
-            return done(null, false);
-        }
-      })
     });
   }
 ));
@@ -51,7 +49,7 @@ router.post('/login',
 
 router.get('/logout', function(req,res){
     req.logout()
-    req.flash('message', 'logged out!')
+    req.flash('message', 'Logged out!')
     res.redirect('/users/login')
 })
 

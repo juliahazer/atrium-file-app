@@ -7,12 +7,7 @@ var userSchema = new mongoose.Schema({
     password: {
         type: String
     }
-})
-
-userSchema.methods.comparePassword = function(candidatePassword, next) {
-  let isMatch = this.password === candidatePassword;
-  next(null, isMatch);
-};
+});
 
 var User = mongoose.model('User', userSchema)
 
