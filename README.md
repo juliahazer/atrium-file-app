@@ -37,6 +37,6 @@
 
 * Due to time constraints, I did not focus on the design of the app. More time should be spent on the design / layout / navigation (and user testing, if possible).
 
-* Currently, if a user adds a file with a duplciate file name, the upload overwrites the existing file but does not delete the associated database file record. Address this issue and/or how to handle the uploading of files with duplicate names.
+* Currently, if a user adds a file with a duplicate file name, the upload overwrites the existing file but does not delete the associated database file record. Address this issue and/or how to handle the uploading of files with duplicate names.
 
 * Explore adding functionality to handle multiple file uploads (or folder uploads)
