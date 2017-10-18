@@ -20,6 +20,8 @@
 
 * In the terminal, type ```nodemon``` to start the app (```http://localhost:3000/```)
 
+* The current correct login info is: username: ```atrium```, password; ```atrium```
+
 
 ### To Move Toward Production-Ready Code:
 
